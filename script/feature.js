@@ -4,7 +4,7 @@
 
 let grid = document.querySelector(".grid-container");
 let popup = document.querySelector(".popup");
-let replay = document.querySelector(".replay");
+let playAgain = document.querySelector(".playAgain");
 let scoreDisplay = document.querySelector(".scoreDisplay");
 let Top = document.querySelector(".top");
 let left = document.querySelector(".left");
@@ -13,11 +13,11 @@ let bottom = document.querySelector(".bottom");
 
 let width = 10;                 // width of the grid board
 let currentIndex = 0;
-let applePosition = 0;           // intial location of the apple on the grid board
-let snakePosition = [2,1,0]      // intial location of the snake on the frid board
+let appleIndex = 0;           // intial location of the apple on the grid board
+let currentSnake = [2,1,0]      // intial location of the snake on the frid board
 let direction = 1;               // snake movement control in four direction
 let score = 0;                   // eating apple score increase
-let speedTime = 0.8;
+let speed = 0.8;
 let intervalTime = 0;
 let interval = 0;
 
@@ -27,9 +27,9 @@ let interval = 0;
 
 document.addEventListener("DOMContentLoaded",function(){       // loads after the html content fires on the page
    document.addEventListener("keyup", control)                  // listen to direction keypress action 
-   createBoard();                                             // invoke the function to create a board
+   createBoard();                                            // invoke the function to create a board
    startGame();                                             // invoke the function to start the game
-   replay.addEventListener("click",Replay);                 // listen to popup click to restart the game
+   playAgain.addEventListener("click", replay);               // listen to popup click to restart the game
 });
 
 //End of major control action
@@ -46,39 +46,40 @@ function createBoard(){
 
 //StartGame function
 function  startGame(){
-   let squares = document.querySelector("grid div");
+   let squares = document.querySelectorAll(".grid-container div");
    randomApple(squares) // display applex box in each squares. which is the grid div box
    direction = 1; // starting the game the snake direction should be right
    scoreDisplay.innerHTML = score;
    intervalTime = 1000;
    currentSnake = [2,1,0];
    currentIndex = 0;
-   currentSnake.forEach(index => squares[index].classlist.add("snake "));
-   Interval = setInterval(moveOutcome,interval)
+   currentSnake.forEach(index => squares[index].classList.add(".snake"));
+   interval = setInterval(moveOutcome,intervalTime)
 }
 //End of startGame function
 
 //Snake movement outcome function
-// function  moveOutcome(squares){ 
-//    let squares = document.querySelector("grid div");
-//    if (checkForHit(squares)) {
-//       alert("You hit an edge,Game over!");
-//       popup.style.display ="flex";
-//       return clearInterval(interval);
-//    } else {
-//       moveSnake(squares);
-//    }
-// }
+function  moveOutcome(){ 
+   let squares = document.querySelectorAll(".grid-container div");
+   if (checkForHit(squares)) {
+      alert("You hit an edge,Game over!");
+      popup.style.display ="flex";
+      return clearInterval(interval);
+   } else {
+      moveSnake(squares);
+   }
+}
 //End snake movement outcome function
 
 //Snake movement function
 function moveSnake(squares){
    let tail = currentSnake.pop();
-   squares[tail].classlist.remove("snake");
+   squares[tail].classList.remove("snake");
    currentSnake.unshift(currentSnake[0]+direction)
    eatApple(squares,tail) ;
    squares[currentSnake[0]].classList.add("snake");
 }
+
 //End snake movement function
 
 // check for block edges function
@@ -98,23 +99,32 @@ function checkForHit(squares){
 // End check for block edges function
 
 // check for block edges function
-// function eatApple(squares,tail){ 
-//    if( squares[currentSnake[0]].classList.contains("apple")) 
-//       { 
-//          squares[currentSnake[0]].classList.remove("apple") 
-//          squares[tail].classList.add("snake") 
-//          currentSnake.push(tail)
-//          randomApple(squares) 
-//          score++ 
-//          scoreDisplay.textContent = score 
-//          clearInterval(interval) 
-//          intervalTime = intervalTime *speed 
-//          interval = setInterval(moveOutcome,intervalTime) 
-//       }
-// }
+function eatApple(squares,tail){ 
+   if( squares[currentSnake[0]].classList.contains("apple")) 
+      { 
+         squares[currentSnake[0]].classList.remove("apple") 
+         squares[tail].classList.add("snake") 
+         currentSnake.push(tail)
+         randomApple(squares) 
+         score++ 
+         scoreDisplay.textContent = score; 
+         clearInterval(interval) ;
+         intervalTime = intervalTime * speed ;
+         interval = setInterval(moveOutcome,intervalTime) 
+      }
+}
+
+function randomApple(squares){ 
+   do{ 
+   appleIndex =Math.floor(Math.random() * squares.length) 
+   console.log(appleIndex)
+   }while(squares[appleIndex].classList.contains("snake")) 
+   squares[appleIndex].classList.add("apple") 
+}
 // End for block edges function
 
 //control function for direction
+//Control for keyboard users
 function control(e){
    if(e.keycode === 39){
       direction = 1; //right
@@ -127,22 +137,24 @@ function control(e){
    }
 }
 
+// from mobile device users
+Top.addEventListener("click",()=>direction= -width);
+bottom.addEventListener("click",()=>direction= +width);
+left.addEventListener("click",()=>direction= -1);
+right.addEventListener("click",()=>direction= 1);
 // End of control function direction
 
 // random apple position
-function randomApple(squares) {
-   do{
-      appleIndex = Math.floor( Math.random() * squares.length);
-   }while(squares[appleIndex].classlist.contains("snake"))
-      squares[appleIndex].classList.add("apple")
-}
+
+
 // end of random apple position
 
 
-// replay function
-// function replay(){
-//    grid.innerHTML ="";
-//    createBoard();
-//    startGame();
-//    popup.style.display = "none";
-// }
+// restart game function 
+function replay() {
+   grid.innerHTML ="";
+   createBoard();
+   startGame();
+   popup.style.display = "none";
+}
+// End of restart game function
